@@ -9,6 +9,7 @@
 """Contains the logic for all of the default options for CaPyCli."""
 
 import os
+import pathlib
 import tomllib
 from typing import Any, Dict
 
@@ -459,7 +460,18 @@ class CommandlineSupport():
 
     def read_config(self, filename: str = "", config_string: str = "") -> Dict[str, Any]:
         """
-        Read configuration from string or config file.
+        Read configuration from a TOML string or config file.
+
+        Lookup order (first source that is found wins, no merging):
+        1. config_string, if non-empty
+        2. filename, if non-empty
+        3. ./.capycli.cfg in the current working directory, if it exists
+        4. ~/.capycli.cfg, if it exists (%USERPROFILE%\\.capycli.cfg on Windows)
+
+        The TOML document must contain a [capycli] table; the keys of that
+        table are returned. Returns an empty dict if no source is found, if
+        the [capycli] table is missing, or on any parse or read error
+        (an error is logged in that case).
         """
 
         toml_dict = None
@@ -469,9 +481,13 @@ class CommandlineSupport():
             elif filename:
                 with open(filename, "rb") as f:
                     toml_dict = tomllib.load(f)
+            elif os.path.isfile(self.CONFIG_FILE_NAME):
+                with open(self.CONFIG_FILE_NAME, "rb") as f:
+                    toml_dict = tomllib.load(f)
             else:
-                if os.path.isfile(self.CONFIG_FILE_NAME):
-                    with open(self.CONFIG_FILE_NAME, "rb") as f:
+                home_config = pathlib.Path.home() / self.CONFIG_FILE_NAME
+                if os.path.isfile(home_config):
+                    with open(home_config, "rb") as f:
                         toml_dict = tomllib.load(f)
 
             if not toml_dict:

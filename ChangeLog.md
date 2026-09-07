@@ -5,6 +5,10 @@
 
 # CaPyCli - Clearing Automation Python Command Line Tool for SW360
 
+## NEXT
+
+* Config file can be located in home directory or current working directory.
+
 ## 2.12.0
 
 * Because of security reasons `-client_id` and `-client_secret` should only
