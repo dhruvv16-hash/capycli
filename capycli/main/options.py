@@ -33,6 +33,18 @@ class CommandlineSupport():
         "old-version": "old_version",
         "package-source": "package_source",
         "forceexit": "force_exit",
+        "overview": "create_overview",
+        "mapresult": "write_mapresult",
+        "rr": "result_required",
+        "if": "inputformat",
+        "of": "outputformat",
+        "remote-granularity": "remote_granularity_list",
+        "local-granularity": "local_granularity_list",
+        "remote-checklist": "remote_check_list",
+        "local-checklist": "local_checklist_list",
+        "X": "debug",
+        "forceerror": "force_error",
+        "project-mainline-state": "project_mainline_state",
     }
 
     def __init__(self) -> None:
