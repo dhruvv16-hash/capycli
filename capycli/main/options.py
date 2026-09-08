@@ -23,6 +23,17 @@ LOG = capycli.get_logger(__name__)
 
 class CommandlineSupport():
     CONFIG_FILE_NAME = ".capycli.cfg"
+    # Maps configuration file keys (derived from the long command line option
+    # name) to the internal name for options where the two differ.
+    CONFIG_KEY_ALIASES: Dict[str, str] = {
+        "url": "sw360_url",
+        "token": "sw360_token",
+        "raw-input": "raw_input",
+        "search-meta-data": "search_meta_data",
+        "old-version": "old_version",
+        "package-source": "package_source",
+        "forceexit": "force_exit",
+    }
 
     def __init__(self) -> None:
         custom_prog = capycli.get_app_signature()
@@ -511,27 +522,8 @@ class CommandlineSupport():
 
         if cfg:
             for key in cfg:
-                args_key = key
-
-                # handle some common naming mistakes
-                if args_key == "url":
-                    args_key = "sw360_url"
-                if args_key == "url":
-                    args_key = "sw360_url"
-                if args_key == "raw-input":
-                    args_key = "raw_input"
-                if args_key == "token":
-                    args_key = "sw360_token"
-                if args_key == "oa":
-                    args_key = "oauth2"
-                if args_key == "search-meta-data":
-                    args_key = "search_meta_data"
-                if args_key == "old-version":
-                    args_key = "old_version"
-                if args_key == "package-source":
-                    args_key = "package_source"
-                if args_key == "forceexit":
-                    args_key = "force_exit"
+                # replace command line options by internal arguments in case they differ
+                args_key = self.CONFIG_KEY_ALIASES.get(key, key)
 
                 if hasattr(args, args_key) and not args.__getattribute__(args_key):
                     args.__setattr__(args_key, cfg[key])
