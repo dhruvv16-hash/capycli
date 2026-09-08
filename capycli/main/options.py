@@ -530,6 +530,9 @@ class CommandlineSupport():
     def process_commandline(self, argv: Any) -> Any:
         """Reads the command line arguments"""
         args = self.parser.parse_args(argv)
+        if args.client_id or args.client_secret:
+            LOG.warning("Providing client_id and client_secret on the command line is not recommended for security"
+                        " reasons. Please use the config file instead.")
         cfg = self.read_config()
 
         if cfg:
