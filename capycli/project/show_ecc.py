@@ -7,11 +7,10 @@
 # -------------------------------------------------------------------------------
 
 import logging
-import os
 import sys
 from typing import Any, Dict
 
-from sw360 import SW360Error, SW360Keycloak
+from sw360 import SW360Error
 
 import capycli.common.script_base
 from capycli.common.json_support import write_json_to_file

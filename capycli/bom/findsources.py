@@ -25,7 +25,6 @@ from cyclonedx.model import ExternalReferenceType, XsUri
 from cyclonedx.model.bom import Bom
 from cyclonedx.model.component import Component
 from sw360 import SW360Error
-from sw360.sw360keycloak import SW360Keycloak
 
 import capycli.common.script_base
 from capycli import get_logger

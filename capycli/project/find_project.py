@@ -7,13 +7,12 @@
 # -------------------------------------------------------------------------------
 
 import logging
-import os
 import sys
 import traceback
 from typing import Any, Dict, Optional
 
 import requests
-from sw360 import SW360Error, SW360Keycloak
+from sw360 import SW360Error
 
 import capycli.common.script_base
 from capycli.common.print import print_red, print_text, print_yellow

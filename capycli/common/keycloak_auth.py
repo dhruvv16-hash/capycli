@@ -1,9 +1,11 @@
 import logging
 from datetime import datetime
+from typing import Any
 
 import jwt
-from requests.auth import AuthBase
 from sw360 import SW360Keycloak
+from requests.auth import AuthBase
+from requests.models import PreparedRequest, Response
 
 from capycli import get_logger
 from capycli.common.print import print_yellow
@@ -12,14 +14,14 @@ LOG = get_logger(__name__)
 
 
 class KeycloakAuth(AuthBase):
-    def __init__(self, url: str, client_id: str, client_secret: str, write_access: bool, initial_token: str):
+    def __init__(self, url: str, client_id: str, client_secret: str, write_access: bool, initial_token: str) -> None:
         self.kc = SW360Keycloak(url)
         self.client_id = client_id
         self.client_secret = client_secret
         self.write_access = write_access
         self.token = initial_token
 
-    def _refresh_token(self):
+    def _refresh_token(self) -> bool:
         try:
             new_token = self.kc.get_keycloak_token(self.client_id, self.client_secret, self.write_access)
             if new_token:
@@ -35,7 +37,8 @@ class KeycloakAuth(AuthBase):
 
     def is_token_expiring_soon(self) -> bool:
         try:
-            decoded = jwt.decode(self.token, algorithms=["HS256"], options={"verify_signature": False})
+            decoded = jwt.decode(  # type: ignore
+                self.token, algorithms=["HS256"], options={"verify_signature": False})
             if "exp" in decoded:
                 exp = datetime.fromtimestamp(int(decoded["exp"]))
                 # refresh if less than 5 minutes remaining
@@ -44,7 +47,7 @@ class KeycloakAuth(AuthBase):
             pass
         return False
 
-    def __call__(self, r):
+    def __call__(self, r: PreparedRequest) -> PreparedRequest:
         # Refresh token shortly before expiry
         if self.token and self.is_token_expiring_soon():
             self._refresh_token()
@@ -52,13 +55,13 @@ class KeycloakAuth(AuthBase):
         if self.token:
             r.headers['Authorization'] = 'Bearer ' + self.token
 
-        r.register_hook('response', self.handle_401)
+        r.register_hook('response', self.handle_401)  # type: ignore
         return r
 
-    def handle_401(self, r, **kwargs):
+    def handle_401(self, r: Response, **kwargs: Any) -> Response:
         if r.status_code == 401 and not getattr(r.request, '_sw360_retried', False):
             # Only retry safe, idempotent methods to prevent duplicating operations
-            if r.request.method not in ["GET", "HEAD", "OPTIONS"]:
+            if r.request and r.request.method not in ["GET", "HEAD", "OPTIONS"]:
                 return r
 
             if LOG.isEnabledFor(logging.DEBUG):
@@ -66,19 +69,21 @@ class KeycloakAuth(AuthBase):
 
             if self._refresh_token():
                 # Consume content of response so we can reuse the connection
-                r.content
+                _ = r.content
                 r.close()
 
                 # Create a new request based on the old one
+                assert r.request is not None
+
                 new_req = r.request.copy()
                 new_req.headers['Authorization'] = 'Bearer ' + self.token
-                new_req._sw360_retried = True
+                setattr(new_req, '_sw360_retried', True)
 
-                if LOG.isEnabledFor(logging.DEBUG):
-                    LOG.debug("Retrying request after token refresh.")
+                # Send new request and get new response
+                if hasattr(r, "connection") and r.connection:
+                    new_resp = r.connection.send(new_req, **kwargs)
+                    new_resp.history.append(r)
+                    new_resp.request = new_req
+                    return new_resp
 
-                _r = r.connection.send(new_req, **kwargs)
-                _r.history.append(r)
-                _r.request = new_req
-                return _r
         return r

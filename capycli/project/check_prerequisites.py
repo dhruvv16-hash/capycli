@@ -13,7 +13,6 @@ from typing import Any, Dict, List, Optional
 
 from colorama import Fore
 from cyclonedx.model.bom import Bom
-from sw360 import SW360Keycloak
 
 import capycli.common.script_base
 from capycli import get_logger

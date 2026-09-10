@@ -12,7 +12,7 @@ import os
 import sys
 from typing import Any, Dict, List
 
-from sw360 import SW360Error, SW360Keycloak
+from sw360 import SW360Error
 
 import capycli.common.script_base
 from capycli.common.json_support import load_json_file

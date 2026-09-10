@@ -7,11 +7,10 @@
 # -------------------------------------------------------------------------------
 
 import logging
-import os
 import sys
 from typing import Any
 
-from sw360 import SW360Error, SW360Keycloak
+from sw360 import SW360Error
 
 import capycli.common.script_base
 from capycli.bom.component_check import ComponentCheck

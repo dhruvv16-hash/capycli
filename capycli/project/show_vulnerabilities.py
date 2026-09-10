@@ -7,13 +7,12 @@
 # -------------------------------------------------------------------------------
 
 import logging
-import os
 import sys
 from typing import Any, Dict, Optional
 
 import requests
 from colorama import Fore, Style
-from sw360 import SW360Error, SW360Keycloak
+from sw360 import SW360Error
 
 import capycli.common.json_support
 import capycli.common.script_base

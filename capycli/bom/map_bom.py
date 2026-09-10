@@ -21,7 +21,7 @@ from cyclonedx.model import ExternalReference, ExternalReferenceType, XsUri
 from cyclonedx.model.bom import Bom
 from cyclonedx.model.component import Component
 from packageurl import PackageURL
-from sw360 import SW360, SW360Keycloak
+from sw360 import SW360
 
 import capycli.common.file_support
 import capycli.common.script_base

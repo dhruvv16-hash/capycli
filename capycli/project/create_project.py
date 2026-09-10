@@ -13,7 +13,7 @@ from typing import Any, Dict, List, Optional
 
 import requests
 from cyclonedx.model.bom import Bom
-from sw360 import SW360Error, SW360Keycloak
+from sw360 import SW360Error
 
 import capycli.common.script_base
 from capycli import get_logger

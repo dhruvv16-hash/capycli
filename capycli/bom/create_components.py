@@ -20,7 +20,7 @@ from colorama import Fore, Style
 from cyclonedx.model.bom import Bom
 from cyclonedx.model.component import Component
 from cyclonedx.model.license import DisjunctiveLicense, LicenseExpression
-from sw360 import SW360Error, SW360Keycloak
+from sw360 import SW360Error
 
 import capycli.common.json_support
 import capycli.common.script_base
