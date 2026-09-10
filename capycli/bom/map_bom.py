@@ -507,9 +507,8 @@ class MapBom(capycli.common.script_base.ScriptBase):
         """
         raw_purl = ""
         if "RepositoryId" in match and match["RepositoryId"]:
-            return match["RepositoryId"]
-
-        if "ExternalIds" in match:
+            raw_purl = match["RepositoryId"]
+        elif "ExternalIds" in match:
             if "package-url" in match["ExternalIds"]:
                 raw_purl = match["ExternalIds"]["package-url"]
             elif "purl" in match["ExternalIds"]:
@@ -520,9 +519,9 @@ class MapBom(capycli.common.script_base.ScriptBase):
 
         purls = PurlUtils.parse_purls_from_external_id(raw_purl)
         if purls:
-            purl = purls[0]
+            return purls[0]
 
-        return purl
+        return ""
 
     def update_bom_item(self, component: Optional[Component], match: Dict[str, Any]) -> Component:
         """Update the (current) SBOM item with values from the match"""
