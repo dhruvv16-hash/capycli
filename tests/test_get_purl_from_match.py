@@ -1,5 +1,5 @@
-import pytest
 from capycli.bom.map_bom import MapBom
+
 
 def test_get_purl_from_match_stringified_array():
     mb = MapBom()
@@ -7,6 +7,7 @@ def test_get_purl_from_match_stringified_array():
     match = {"RepositoryId": '["pkg:cargo/clap_builder@4.5.60","pkg:cargo/clap@4.5.60"]'}
     purl = mb.get_purl_from_match(match)
     assert purl == "pkg:cargo/clap_builder@4.5.60"
+
 
 def test_get_purl_from_match_single_purl():
     mb = MapBom()
