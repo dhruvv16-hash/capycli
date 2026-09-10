@@ -1,14 +1,15 @@
 import logging
-import time
 from datetime import datetime
+
 import jwt
 from requests.auth import AuthBase
 from sw360 import SW360Keycloak
 
-from capycli.common.print import print_text, print_yellow
 from capycli import get_logger
+from capycli.common.print import print_yellow
 
 LOG = get_logger(__name__)
+
 
 class KeycloakAuth(AuthBase):
     def __init__(self, url: str, client_id: str, client_secret: str, write_access: bool, initial_token: str):
@@ -28,8 +29,8 @@ class KeycloakAuth(AuthBase):
                 return True
             else:
                 print_yellow("  Failed to refresh token: empty token returned")
-        except Exception as ex:
-            print_yellow("  Failed to refresh token: " + repr(ex))
+        except Exception:
+            print_yellow("  Failed to refresh token. Check credentials and server status.")
         return False
 
     def is_token_expiring_soon(self) -> bool:
@@ -55,23 +56,27 @@ class KeycloakAuth(AuthBase):
         return r
 
     def handle_401(self, r, **kwargs):
-        if r.status_code == 401 and not getattr(r, '_sw360_retried', False):
+        if r.status_code == 401 and not getattr(r.request, '_sw360_retried', False):
+            # Only retry safe, idempotent methods to prevent duplicating operations
+            if r.request.method not in ["GET", "HEAD", "OPTIONS"]:
+                return r
+
             if LOG.isEnabledFor(logging.DEBUG):
                 LOG.debug("Received 401 Unauthorized, attempting token refresh...")
-                
+
             if self._refresh_token():
                 # Consume content of response so we can reuse the connection
                 r.content
                 r.close()
-                
+
                 # Create a new request based on the old one
                 new_req = r.request.copy()
                 new_req.headers['Authorization'] = 'Bearer ' + self.token
                 new_req._sw360_retried = True
-                
+
                 if LOG.isEnabledFor(logging.DEBUG):
                     LOG.debug("Retrying request after token refresh.")
-                
+
                 _r = r.connection.send(new_req, **kwargs)
                 _r.history.append(r)
                 _r.request = new_req
